@@ -25,7 +25,7 @@ public class SerialCommunication {
          if ( commPort instanceof SerialPort )
          {
             SerialPort serialPort = (SerialPort) commPort;
-            serialPort.setSerialPortParams(57600,SerialPort.DATABITS_8,SerialPort.STOPBITS_1,SerialPort.PARITY_NONE);
+            serialPort.setSerialPortParams(9600,SerialPort.DATABITS_8,SerialPort.STOPBITS_1,SerialPort.PARITY_NONE);
 
             InputStream in = serialPort.getInputStream();
             OutputStream out = serialPort.getOutputStream();
@@ -100,7 +100,7 @@ public class SerialCommunication {
    {
       try
       {
-         (new SerialCommunication()).connect("COM3");
+         (new SerialCommunication()).connect("/dev/ttyUSB0");
       }
       catch ( Exception e )
       {
