@@ -1,4 +1,4 @@
-package com.spookyrobotics;
+package com.spookyrobotics.communication;
 
 import gnu.io.CommPort;
 import gnu.io.CommPortIdentifier;
@@ -11,7 +11,13 @@ import java.io.OutputStream;
 // http://rxtx.qbang.org/wiki/index.php/Two_way_communcation_with_the_serial_port
 public class SerialCommunication {
 
-   void connect ( String portName ) throws Exception
+   public SerialCommunication(String port){
+      this.portName = port;
+
+   }
+   private final String portName;
+
+   void connect  () throws Exception
    {
       CommPortIdentifier portIdentifier = CommPortIdentifier.getPortIdentifier(portName);
       if ( portIdentifier.isCurrentlyOwned() )
@@ -100,11 +106,10 @@ public class SerialCommunication {
    {
       try
       {
-         (new SerialCommunication()).connect("/dev/ttyUSB0");
+         (new SerialCommunication("/dev/ttyUSB0")).connect();
       }
       catch ( Exception e )
       {
-         // TODO Auto-generated catch block
          e.printStackTrace();
       }
    }
