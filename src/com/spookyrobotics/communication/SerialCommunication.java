@@ -1,5 +1,6 @@
 package com.spookyrobotics.communication;
 
+import com.spookyrobotics.botStructs.InstructorCommand;
 import gnu.io.CommPort;
 import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
@@ -7,6 +8,8 @@ import gnu.io.SerialPort;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Collections;
 
 // http://rxtx.qbang.org/wiki/index.php/Two_way_communcation_with_the_serial_port
 public class SerialCommunication {
@@ -17,7 +20,7 @@ public class SerialCommunication {
    }
    private final String portName;
 
-   void connect  () throws Exception
+   void connect() throws Exception
    {
       CommPortIdentifier portIdentifier = CommPortIdentifier.getPortIdentifier(portName);
       if ( portIdentifier.isCurrentlyOwned() )
@@ -79,8 +82,9 @@ public class SerialCommunication {
    public static class SerialWriter implements Runnable
    {
       OutputStream out;
+       private ArrayList<Byte> transmitBuffer;
 
-      public SerialWriter ( OutputStream out )
+       public SerialWriter ( OutputStream out )
       {
          this.out = out;
       }
@@ -100,17 +104,15 @@ public class SerialCommunication {
             e.printStackTrace();
          }
       }
+
+      public void write(InstructorCommand command){
+          byte[] value = command.flatten();
+          Collections.addAll(transmitBuffer, InstructorCommand.transmitPrelude());
+          for(byte b : value){
+              transmitBuffer.add(b);
+          }
+          Collections.addAll(transmitBuffer, InstructorCommand.transmitPostlude(command));
+      }
    }
 
-   public static void main ( String[] args )
-   {
-      try
-      {
-         (new SerialCommunication("/dev/ttyUSB0")).connect();
-      }
-      catch ( Exception e )
-      {
-         e.printStackTrace();
-      }
-   }
 }

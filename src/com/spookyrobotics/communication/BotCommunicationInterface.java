@@ -10,22 +10,13 @@ import java.util.ArrayList;
  *
  * Bots are always passive and respond to \n characters that signal end of line
  */
-public class BotCommunication {
-    private final String portName;
-
-    public Bot getAttachedBot(){return null;}
-    public void sendInstructorCommand(InstructorCommand command){}
+public interface BotCommunicationInterface {
+    public Bot getAttachedBot();
+    public void sendInstructorCommand(InstructorCommand command);
 
     /*
      * Data sent is as follows
      * [Effectors List Size] [ Effectors List ] [ Sensors List Size] [Sensors List]
      */
-    public ArrayList<Integer> readBotData(){ return null;}
-
-    private final SerialCommunication serialCommunication;
-
-    public BotCommunication(String port){
-        this.portName = port;
-        serialCommunication = new SerialCommunication(portName);
-    }
+    public ArrayList<Integer> readBotData();
 }
