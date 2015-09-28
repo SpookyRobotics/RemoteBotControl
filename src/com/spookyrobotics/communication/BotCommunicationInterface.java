@@ -11,7 +11,7 @@ import java.util.ArrayList;
  * Bots are always passive and respond to \n characters that signal end of line
  */
 public interface BotCommunicationInterface {
-    public Bot getAttachedBot();
+    public boolean isBotAttached();
     public void sendInstructorCommand(InstructorCommand command);
 
     /*

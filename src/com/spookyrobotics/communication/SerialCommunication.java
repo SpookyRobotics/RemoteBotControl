@@ -1,21 +1,21 @@
 package com.spookyrobotics.communication;
 
+import com.spookyrobotics.botStructs.HandshakeCommand;
 import com.spookyrobotics.botStructs.InstructorCommand;
 import gnu.io.CommPort;
 import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Enumeration;
 
 // http://rxtx.qbang.org/wiki/index.php/Two_way_communcation_with_the_serial_port
 public class SerialCommunication {
 
+   private SerialReader serialReader;
+   private SerialWriter serialWriter;
    public SerialCommunication(String port){
       this.portName = port;
 
@@ -47,9 +47,10 @@ public class SerialCommunication {
 
             InputStream in = serialPort.getInputStream();
             OutputStream out = serialPort.getOutputStream();
-
-            (new Thread(new SerialReader(in))).start();
-            (new Thread(new SerialWriter(out))).start();
+            serialReader = new SerialReader(in);
+            serialWriter = new SerialWriter(out);
+            serialReader.start();
+            serialWriter.start();
 
          }
          else {
@@ -58,73 +59,21 @@ public class SerialCommunication {
       }
    }
 
-   /** */
-   public static class SerialReader implements Runnable
-   {
-      InputStream in;
-
-      public SerialReader ( InputStream in )
-      {
-         this.in = in;
-      }
-
-      public void run () {
-         byte[] buffer = new byte[1024];
-         int len = -1;
-         try {
-            while ( ( len = this.in.read(buffer)) > -1 ) {
-               System.out.print(new String(buffer,0,len));
-            }
-         }
-         catch ( IOException e ) {
-            e.printStackTrace();
-         }
+   public void write(InstructorCommand command){
+      if(serialWriter != null){
+         serialWriter.write(command);
       }
    }
 
-   /** */
-   public static class SerialWriter implements Runnable
-   {
-      OutputStream out;
-      private final ArrayList<Byte> transmitBuffer;
-      public SerialWriter ( OutputStream out ) {
-         this.out = out;
-         transmitBuffer = new ArrayList<>();
-      }
-
-      public void run () {
-         try {
-            int c = -1;
-            while ( transmitBuffer.size() > 0 || System.in.available() > -1 ) {
-               while(System.in.available() > -1){
-                  c = System.in.read();
-                  this.out.write(c);
-               }
-               if(transmitBuffer.size() > 0){
-                  synchronized (transmitBuffer){
-                     for(Byte b : transmitBuffer) {
-                        this.out.write(b);
-                     }
-                     transmitBuffer.clear();
-                  }
-               }
-            }
-         }
-         catch ( IOException e ) {
-            e.printStackTrace();
-         }
-      }
-
-      public void write(InstructorCommand command){
-         byte[] value = command.flatten();
-         synchronized (transmitBuffer) {
-            Collections.addAll(transmitBuffer, InstructorCommand.transmitPrelude());
-            for (byte b : value) {
-               transmitBuffer.add(b);
-            }
-            Collections.addAll(transmitBuffer, InstructorCommand.transmitPostlude(command));
-         }
-      }
+   public ArrayList<Integer> readData() {
+      return serialReader.readData();
    }
 
+   public boolean handshake() {
+      serialWriter.write(HandshakeCommand.flatten());
+      if(serialReader.receivedHandshake()){
+         return true;
+      }
+      return false;
+   }
 }

@@ -26,6 +26,7 @@ public class Bot implements BotInterface {
     private Bot(int id, String port){
         this.id = id;
         this.portName = port;
+        serialCommunication = new SerialCommunication(portName);
     }
 
 
@@ -40,17 +41,18 @@ public class Bot implements BotInterface {
     }
 
     @Override
-    public Bot getAttachedBot() {
-        return null;
+    public boolean isBotAttached() {
+        return serialCommunication.handshake();
     }
 
     @Override
     public void sendInstructorCommand(InstructorCommand command) {
-        //serialCommunication
+        serialCommunication.write(command);
     }
 
     @Override
     public ArrayList<Integer> readBotData() {
+        data = serialCommunication.readData();
         return data;
     }
 
